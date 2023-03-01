@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>短信设置</title>
+    <link rel="stylesheet" href="/app/admin/component/pear/css/pear.css" />
+    <link rel="stylesheet" href="/app/admin/admin/css/reset.css" />
+</head>
+<body class="pear-container">
+
+
+<div class="layui-card">
+    <div class="layui-card-body">
+
+        <div class="layui-tab layui-tab-brief">
+            <ul class="layui-tab-title">
+                <?php
+                    $i = 0;
+                    foreach($template['gateways'] as $gatewayName => $gateway){
+                ?>
+                <li<?=$i++==0?' class="layui-this"':''?>><?=$gateway['name']?></li>
+                <?php } ?>
+            </ul>
+            <div class="layui-tab-content">
+
+                <?php
+                $i = 0;
+                foreach($template['gateways'] as $gatewayName => $gateway){ ?>
+                <div class="layui-tab-item<?=$i++==0?' layui-show':''?>">
+
+                    <form class="layui-form" action="" onsubmit="return false" lay-filter="<?=$gatewayName?>">
+
+                        <input type="hidden" name="gateway" value="<?=$gatewayName?>">
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">状态</label>
+                            <div class="layui-input-block">
+                                <input type="checkbox" name="enable" lay-skin="switch" lay-text="开启|关闭">
+                            </div>
+                        </div>
+
+                        <?php
+                            foreach($gateway as $field => $value){
+                            if ($field === 'name') continue;
+                        ?>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label"><?=$field?></label>
+                            <div class="layui-input-block">
+                                <input type="text" name="<?=$field?>" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <?php } ?>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button type="submit" class="pear-btn pear-btn-primary pear-btn-md" lay-submit="" lay-filter="save<?=$gatewayName?>">
+                                    保存
+                                </button>
+
+                                <button type="button" class="pear-btn pear-btn-warming pear-btn-md" data-gateway="<?=$gatewayName?>" id="test">
+                                    测试
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <?php } ?>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script src="/app/admin/component/layui/layui.js"></script>
+<script src="/app/admin/component/pear/pear.js"></script>
+<script src="/app/admin/admin/js/common.js"></script>
+
+<script>
+    layui.use(["form", "popup"], function(){
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        $.ajax({
+            url: "/app/sms/admin/setting/get",
+            success: function (res) {
+                if (res.code) {
+                    return layui.popup.failure(res.msg);
+                }
+                $.each(res.data.gateways, function (gateway, config) {
+                    form.val(gateway, config);
+                });
+            }
+        });
+
+        // 提交表单
+        <?php foreach($template['gateways'] as $gatewayName => $gateway){ ?>
+
+        form.on("submit(save<?=$gatewayName?>)", function(data){
+            $.ajax({
+                url: "/app/sms/admin/setting/save",
+                dataType: "json",
+                type: "POST",
+                data: data.field,
+                success: function (res) {
+                    if (res.code) {
+                        return layui.popup.failure(res.msg);
+                    }
+                    form.val("<?=$gatewayName?>", data.field);
+                    return layui.popup.success("操作成功");
+                }
+            });
+            return false;
+        });
+
+        <?php } ?>
+
+        $('#test').click(function (){
+            let gateway = $(this).data('gateway');
+            layer.open({
+                type: 2,
+                title: "测试",
+                shade: 0.1,
+                area: ["500px", "450px"],
+                content: '/app/sms/admin/setting/test?gateway=' + gateway
+            });
+        });
+    });
+
+</script>
+
+<style>
+
+    .layui-input-block {
+        margin-left: 150px;
+    }
+
+    .layui-form-label {
+        width:120px;
+    }
+
+    form {
+        width: 520px;
+    }
+
+</style>
+</body>
+</html>
+
