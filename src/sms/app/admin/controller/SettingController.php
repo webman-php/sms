@@ -126,7 +126,10 @@ class SettingController
                 'data' => $data
             ], [$gateway]);
         }  catch (Throwable $e) {
-            throw new BusinessException(current($e->getExceptions())->getMessage());
+            if (method_exists($e, 'getExceptions')) {
+                throw new BusinessException(current($e->getExceptions())->getMessage());
+            }
+            throw $e;
         }
         return json(['code' => 0, 'msg' => 'ok']);
     }
