@@ -32,8 +32,6 @@
                         <ul class="layui-tab-title">
                             <li class="layui-this">模版管理</li>
                             <li>账户设置</li>
-                            <li>测试</li>
-
                         </ul>
                         <div class="layui-tab-content">
 
@@ -102,10 +100,7 @@
                                     </div>
                                 </form>
                             </div>
-
-                            <div class="layui-tab-item">
-                                测试
-                            </div>
+                            
                         </div>
                     </div>
 
@@ -325,13 +320,31 @@
 
         }
 
+        // 刷新表格数据
+        window.refreshTable = function() {
+            $.ajax({
+                url: "/app/sms/admin/setting/get",
+                success: function (res) {
+                    if (res.code) {
+                        return layui.popup.failure(res.msg);
+                    }
+                    if (res.data && res.data.gateways) {
+                        $.each(res.data.gateways, function (gateway, config) {
+                            let data = [];
+                            $.each(config.templates || [], function (templateName, template) {
+                                template.name = templateName;
+                                data.push(template);
+                            });
+                            table.reloadData("data-table-" + gateway, {data: data, scrollPos: "fixed"});
+                        });
+                    }
+                }
+            });
+        }
+
 
     })
 
-    // 刷新表格数据
-    window.refreshTable = function(param) {
-
-    }
 
 </script>
 
@@ -362,16 +375,6 @@
 
             <?php } ?>
 
-        $('#test').click(function (){
-            let gateway = $(this).data('gateway');
-            layer.open({
-                type: 2,
-                title: "测试",
-                shade: 0.1,
-                area: ["500px", "450px"],
-                content: '/app/sms/admin/setting/test?gateway=' + gateway
-            });
-        });
     });
 
 </script>

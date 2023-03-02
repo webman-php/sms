@@ -90,42 +90,6 @@ class SettingController
     }
 
     /**
-     * 短信测试
-     * @param Request $request
-     * @return Response
-     * @throws InvalidArgumentException
-     * @throws NoGatewayAvailableException
-     * @throws BusinessException
-     */
-    public function test(Request $request): Response
-    {
-        if ($request->method() === 'GET') {
-            $gateway = $request->get('gateway');
-            return view('setting/test', [
-                'gateway' => $gateway,
-            ]);
-        }
-
-        $gateway = $request->post('gateway');
-        $to = $request->post('mobile');
-        $data = $request->post('data');
-        $data = $data ? json_decode($data, true) : [];
-        try {
-            Sms::send($to, [
-                'content' => $request->post('content'),
-                'template' => $request->post('template'),
-                'data' => $data
-            ], [$gateway]);
-        }  catch (Throwable $e) {
-            if (method_exists($e, 'getExceptions')) {
-                throw new BusinessException(current($e->getExceptions())->getMessage());
-            }
-            throw $e;
-        }
-        return json(['code' => 0, 'msg' => 'ok']);
-    }
-
-    /**
      * 短信模版测试
      * @param Request $request
      * @return Response
@@ -186,12 +150,16 @@ class SettingController
         if ($request->method() === 'POST') {
             $gateway = $request->post('gateway');
             $name = $request->post('name');
+            $newName = $request->post('new_name');
             if (!Template::get($gateway, $name)) {
                 return json(['code' => 1, 'msg' => '模版不存在']);
             }
+            if ($newName != $name) {
+                Template::delete($gateway, [$name]);
+            }
             $templateId = $request->post('template_id');
             $sign = $request->post('sign');
-            Template::save($gateway, $name, ['template_id' => $templateId, 'sign' => $sign]);
+            Template::save($gateway, $newName, ['template_id' => $templateId, 'sign' => $sign]);
             return json(['code' => 0, 'msg' => 'ok']);
         }
         return view('template/update');

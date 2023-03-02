@@ -42,7 +42,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">模版名</label>
                 <div class="layui-input-block">
-                    <input type="text" name="name" required  lay-verify="required" placeholder="模版名" autocomplete="off" class="layui-input">
+                    <input type="text" name="new_name" required  lay-verify="required" placeholder="模版名" autocomplete="off" class="layui-input">
                 </div>
             </div>
 
@@ -87,7 +87,7 @@
 
         let $ = layui.$;
 
-        $('input[name="name"]').val(layui.url().search.name);
+        $('input[name="new_name"]').val(layui.url().search.name);
 
         $.ajax({
             url: SELECT_API,
@@ -103,6 +103,7 @@
         layui.form.on("submit(save)", function () {
             let data = layui.form.val("create-template-form");
             data.gateway = layui.url().search.gateway;
+            data.name = layui.url().search.name;
             layui.$.ajax({
                 url: UPDATE_API,
                 type: "POST",
