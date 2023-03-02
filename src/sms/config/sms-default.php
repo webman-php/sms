@@ -19,12 +19,14 @@ return [
             'name' => '阿里云',
             'access_key_id' => '',
             'access_key_secret' => '',
+            'sign_name' => '',
         ],
         'qcloud' => [
             'name' => '腾讯云',
             'sdk_app_id' => '',
             'secret_id' => '',
             'secret_key' => '',
+            'sign_name' => '',
         ],
     ],
 ];

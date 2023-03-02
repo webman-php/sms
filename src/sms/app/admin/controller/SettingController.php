@@ -21,7 +21,7 @@ class SettingController
 {
 
     /**
-     * 邮件设置页
+     * 短信设置页
      * @return Response
      */
     public function index()

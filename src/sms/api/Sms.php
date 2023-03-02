@@ -23,7 +23,7 @@ class Sms
      * @param string|array $to
      * @param array $data
      * @param array $gateways
-     * @return void
+     * @return array
      * @throws BusinessException
      * @throws InvalidArgumentException
      * @throws NoGatewayAvailableException
@@ -31,7 +31,7 @@ class Sms
     public static function send($to, array $data, array $gateways = [])
     {
         $sms = static::getSms();
-        $sms->send($to, $data, $gateways);
+        return $sms->send($to, $data, $gateways);
     }
 
     /**

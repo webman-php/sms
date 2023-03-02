@@ -82,7 +82,7 @@
                                     <div class="layui-form-item">
                                         <label class="layui-form-label"><?=$field?></label>
                                         <div class="layui-input-block">
-                                            <input type="text" name="<?=$field?>" required lay-verify="required" autocomplete="off" class="layui-input">
+                                            <input type="text" name="<?=$field?>" required lay-verify="required" autocomplete="off" class="layui-input" placeholder="<?=$field=='sign_name'?'默认签名':''?>">
                                         </div>
                                     </div>
                                     <?php } ?>
@@ -100,7 +100,7 @@
                                     </div>
                                 </form>
                             </div>
-                            
+
                         </div>
                     </div>
 
