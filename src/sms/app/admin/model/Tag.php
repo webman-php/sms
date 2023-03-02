@@ -6,12 +6,12 @@ use plugin\admin\app\model\Option;
 use plugin\sms\api\Sms;
 
 /**
- * 短信模版相关
+ * 短信标签相关
  */
-class Template
+class Tag
 {
     /**
-     * 获取模版
+     * 获取标签
      * @param $gateway
      * @param $name
      * @return mixed|null
@@ -19,11 +19,11 @@ class Template
     public static function get($gateway, $name)
     {
         $config = Sms::getConfig();
-        return $config['gateways'][$gateway]['templates'][$name] ?? null;
+        return $config['gateways'][$gateway]['tags'][$name] ?? null;
     }
 
     /**
-     * 保存模版
+     * 保存标签
      * @param $gateway
      * @param $name
      * @param $value
@@ -32,7 +32,7 @@ class Template
     public static function save($gateway, $name, $value)
     {
         $config = Sms::getConfig();
-        $config['gateways'][$gateway]['templates'][$name] = $value;
+        $config['gateways'][$gateway]['tags'][$name] = $value;
         $optionName = Sms::OPTION_NAME;
         if (!$option = Option::where('name', $optionName)->first()) {
             $option = new Option;
@@ -43,7 +43,7 @@ class Template
     }
 
     /**
-     * 删除模版
+     * 删除标签
      * @param $gateway
      * @param array $names
      * @return void
@@ -52,7 +52,7 @@ class Template
     {
         $config = Sms::getConfig();
         foreach ($names as $name) {
-            unset($config['gateways'][$gateway]['templates'][$name]);
+            unset($config['gateways'][$gateway]['tags'][$name]);
         }
         $optionName = Sms::OPTION_NAME;
         if (!$option = Option::where('name', $optionName)->first()) {

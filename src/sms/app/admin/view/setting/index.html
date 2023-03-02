@@ -30,12 +30,12 @@
 
                     <div class="layui-tab">
                         <ul class="layui-tab-title">
-                            <li class="layui-this">模版管理</li>
+                            <li class="layui-this">标签管理</li>
                             <li>账户设置</li>
                         </ul>
                         <div class="layui-tab-content">
 
-                            <!-- 模版管理 -->
+                            <!-- 标签管理 -->
                             <div class="layui-tab-item layui-show">
                                 <!-- 数据表格 -->
                                 <div class="layui-card">
@@ -46,19 +46,19 @@
 
                                 <!-- 表格顶部工具栏 -->
                                 <script type="text/html" id="table-toolbar">
-                                    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add" permission="app.sms.admin.setting.insertTemplate">
+                                    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add" permission="app.sms.admin.setting.insertTag">
                                         <i class="layui-icon layui-icon-add-1"></i>新增
                                     </button>
-                                    <button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove" permission="app.sms.admin.setting.deleteTemplate">
+                                    <button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove" permission="app.sms.admin.setting.deleteTag">
                                         <i class="layui-icon layui-icon-delete"></i>删除
                                     </button>
                                 </script>
 
                                 <!-- 表格行工具栏 -->
                                 <script type="text/html" id="table-bar">
-                                    <button class="pear-btn pear-btn-xs tool-btn" lay-event="edit" permission="app.sms.admin.setting.updateTemplate">编辑</button>
-                                    <button class="pear-btn pear-btn-xs tool-btn" lay-event="test" permission="app.sms.admin.setting.testTemplate">测试</button>
-                                    <button class="pear-btn pear-btn-xs tool-btn" lay-event="remove" permission="app.sms.admin.setting.deleteTemplate">删除</button>
+                                    <button class="pear-btn pear-btn-xs tool-btn" lay-event="edit" permission="app.sms.admin.setting.updateTag">编辑</button>
+                                    <button class="pear-btn pear-btn-xs tool-btn" lay-event="test" permission="app.sms.admin.setting.testTag">测试</button>
+                                    <button class="pear-btn pear-btn-xs tool-btn" lay-event="remove" permission="app.sms.admin.setting.deleteTag">删除</button>
                                 </script>
                             </div>
 
@@ -121,18 +121,18 @@
 <script src="/app/admin/admin/js/common.js"></script>
 
 
-<!-- 模版设置 -->
+<!-- 标签设置 -->
 <script>
 
     const defaultConfig = <?=json_encode($defaultConfig, JSON_UNESCAPED_UNICODE)?>;
 
     // 相关接口
-    const SELECT_API = "/app/sms/admin/setting/selectTemplate";
-    const UPDATE_API = "/app/sms/admin/setting/updateTemplate";
-    const DELETE_API = "/app/sms/admin/setting/deleteTemplate";
-    const INSERT_URL = "/app/sms/admin/setting/insertTemplate";
-    const UPDATE_URL = "/app/sms/admin/setting/updateTemplate";
-    const TEST_URL = "/app/sms/admin/setting/TestTemplate";
+    const SELECT_API = "/app/sms/admin/setting/selectTag";
+    const UPDATE_API = "/app/sms/admin/setting/updateTag";
+    const DELETE_API = "/app/sms/admin/setting/deleteTag";
+    const INSERT_URL = "/app/sms/admin/setting/insertTag";
+    const UPDATE_URL = "/app/sms/admin/setting/updateTag";
+    const TEST_URL = "/app/sms/admin/setting/TestTag";
 
     // 表格渲染
     layui.use(["table", "form", "common", "popup"], function() {
@@ -146,7 +146,7 @@
             {
                 type: "checkbox"
             },{
-                title: "模版名称",
+                title: "标签名称",
                 field: "name",
                 width: 200,
             },{
@@ -184,9 +184,9 @@
         {
             form.val(gateway, config);
             let data = [];
-            $.each(config.templates||[], function (templateName, template) {
-                template.name = templateName;
-                data.push(template);
+            $.each(config.tags||[], function (tagName, tag) {
+                tag.name = tagName;
+                data.push(tag);
             });
             let tableName = "data-table-" + gateway;
             table.render({
@@ -331,9 +331,9 @@
                     if (res.data && res.data.gateways) {
                         $.each(res.data.gateways, function (gateway, config) {
                             let data = [];
-                            $.each(config.templates || [], function (templateName, template) {
-                                template.name = templateName;
-                                data.push(template);
+                            $.each(config.tags || [], function (tagName, tag) {
+                                tag.name = tagName;
+                                data.push(tag);
                             });
                             table.reloadData("data-table-" + gateway, {data: data, scrollPos: "fixed"});
                         });

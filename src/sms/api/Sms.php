@@ -21,41 +21,41 @@ class Sms
     /**
      * 发送短信
      * @param string|array $to
-     * @param array $data
+     * @param array $message
      * @param array $gateways
      * @return array
      * @throws BusinessException
      * @throws InvalidArgumentException
      * @throws NoGatewayAvailableException
      */
-    public static function send($to, array $data, array $gateways = [])
+    public static function send($to, array $message, array $gateways = []): array
     {
         $sms = static::getSms();
-        return $sms->send($to, $data, $gateways);
+        return $sms->send($to, $message, $gateways);
     }
 
     /**
-     * @param $templateName
+     * @param $tagName
      * @param $to
-     * @param array $templateData
+     * @param array $data
      * @param array $gateways
-     * @return void
+     * @return array
      * @throws InvalidArgumentException
      * @throws NoGatewayAvailableException
      */
-    public static function sendByTemplate($to, $templateName, array $templateData = [], array $gateways = [])
+    public static function sendByTag($to, $tagName, array $data = [], array $gateways = []): array
     {
         $config = static::getConfig();
         $templates = [];
         foreach ($config['gateways'] as $gatewayName => $gateway) {
-            if (!isset($gateway['templates'][$templateName])) {
+            if (!isset($gateway['templates'][$tagName])) {
                 continue;
             }
-            $tmp = $gateway['templates'][$templateName];
+            $tmp = $gateway['templates'][$tagName];
             $templates[$gatewayName] = ['template_id' => $tmp['template_id'], 'sign' => $tmp['sign']];
         }
         if (!$templates) {
-            throw new RuntimeException("短信模版 $templateName 不存在");
+            throw new RuntimeException("短信标签 $tagName 不存在");
         }
         $newConfig = [
             'timeout' => $config['timeout'],
@@ -69,14 +69,14 @@ class Sms
             $newConfig['gateways'][$gatewayName] = $tmp;
         }
         $sms = new EasySms($newConfig);
-        $sms->send($to, [
+        return $sms->send($to, [
             // 不同的厂商有不同的模版id
             'template' => function ($gateway) use ($templates) {
                 $gatewayName = $gateway->getName();
                 return $templates[$gatewayName]['template_id'];
             },
-            'data' => function($gateway) use ($templateData) {
-                return $templateData;
+            'data' => function($gateway) use ($data) {
+                return $data;
             },
         ] , $gateways);
     }

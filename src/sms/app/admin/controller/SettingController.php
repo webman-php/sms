@@ -7,7 +7,7 @@ use Overtrue\EasySms\Exceptions\NoGatewayAvailableException;
 use Overtrue\EasySms\Strategies\OrderStrategy;
 use plugin\admin\app\model\Option;
 use plugin\sms\api\Sms;
-use plugin\sms\app\admin\model\Template;
+use plugin\sms\app\admin\model\Tag;
 use support\exception\BusinessException;
 use support\Request;
 use support\Response;
@@ -90,7 +90,7 @@ class SettingController
     }
 
     /**
-     * 短信模版测试
+     * 短信标签测试
      * @param Request $request
      * @return Response
      * @throws BusinessException
@@ -98,19 +98,19 @@ class SettingController
      * @throws NoGatewayAvailableException
      * @throws Throwable
      */
-    public function testTemplate(Request $request): Response
+    public function testTag(Request $request): Response
     {
         if ($request->method() === 'GET') {
-            return view('template/test');
+            return view('tag/test');
         }
 
         $gateway = $request->post('gateway');
         $to = $request->post('to');
-        $templateName = $request->post('name');
+        $tagName = $request->post('name');
         $data = $request->post('data');
         $data = $data ? json_decode($data, true) : [];
         try {
-            Sms::sendByTemplate($to, $templateName, $data, [$gateway]);
+            Sms::sendByTag($to, $tagName, $data, [$gateway]);
         }  catch (Throwable $e) {
             if (method_exists($e, 'getExceptions')) {
                 throw new BusinessException(current($e->getExceptions())->getMessage());
@@ -125,19 +125,19 @@ class SettingController
      * @param Request $request
      * @return Response
      */
-    public function insertTemplate(Request $request): Response
+    public function insertTag(Request $request): Response
     {
         if ($request->method() === 'POST') {
             $gateway = $request->post('gateway');
             $name = $request->post('name');
-            if (Template::get($gateway, $name)) {
-                return json(['code' => 1, 'msg' => '模版已经存在']);
+            if (Tag::get($gateway, $name)) {
+                return json(['code' => 1, 'msg' => '标签已经存在']);
             }
             $templateId = $request->post('template_id');
             $sign = $request->post('sign');
-            Template::save($gateway, $name, ['template_id' => $templateId, 'sign' => $sign]);
+            Tag::save($gateway, $name, ['template_id' => $templateId, 'sign' => $sign]);
         }
-        return view('template/insert');
+        return view('tag/insert');
     }
 
     /**
@@ -145,24 +145,24 @@ class SettingController
      * @param Request $request
      * @return Response
      */
-    public function updateTemplate(Request $request): Response
+    public function updateTag(Request $request): Response
     {
         if ($request->method() === 'POST') {
             $gateway = $request->post('gateway');
             $name = $request->post('name');
             $newName = $request->post('new_name');
-            if (!Template::get($gateway, $name)) {
-                return json(['code' => 1, 'msg' => '模版不存在']);
+            if (!Tag::get($gateway, $name)) {
+                return json(['code' => 1, 'msg' => '标签不存在']);
             }
             if ($newName != $name) {
-                Template::delete($gateway, [$name]);
+                Tag::delete($gateway, [$name]);
             }
             $templateId = $request->post('template_id');
             $sign = $request->post('sign');
-            Template::save($gateway, $newName, ['template_id' => $templateId, 'sign' => $sign]);
+            Tag::save($gateway, $newName, ['template_id' => $templateId, 'sign' => $sign]);
             return json(['code' => 0, 'msg' => 'ok']);
         }
-        return view('template/update');
+        return view('tag/update');
     }
 
     /**
@@ -170,24 +170,24 @@ class SettingController
      * @param Request $request
      * @return Response
      */
-    public function deleteTemplate(Request $request): Response
+    public function deleteTag(Request $request): Response
     {
         $gateway = $request->post('gateway');
         $names = (array)$request->post('name');
-        Template::delete($gateway, $names);
+        Tag::delete($gateway, $names);
         return json(['code' => 0, 'msg' => 'ok']);
     }
 
     /**
-     * 获取模版
+     * 获取标签
      * @param Request $request
      * @return Response
      */
-    public function getTemplate(Request $request): Response
+    public function getTag(Request $request): Response
     {
         $gateway = $request->get('gateway');
         $name = $request->get('name');
-        return json(['code' => 0, 'msg' => 'ok', 'data' => Template::get($gateway, $name)]);
+        return json(['code' => 0, 'msg' => 'ok', 'data' => Tag::get($gateway, $name)]);
     }
 
 }
