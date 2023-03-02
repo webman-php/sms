@@ -7,6 +7,7 @@ use Overtrue\EasySms\Exceptions\NoGatewayAvailableException;
 use Overtrue\EasySms\Strategies\OrderStrategy;
 use plugin\admin\app\model\Option;
 use plugin\sms\api\Sms;
+use plugin\sms\app\admin\model\Template;
 use support\exception\BusinessException;
 use support\Request;
 use support\Response;
@@ -25,9 +26,9 @@ class SettingController
      */
     public function index()
     {
-        $smsTemplate = config('plugin.sms.sms-template');
+        $defaultConfig = config('plugin.sms.sms-default');
         return view('setting/index', [
-            'template' => $smsTemplate,
+            'defaultConfig' => $defaultConfig,
         ]);
     }
 
@@ -55,24 +56,14 @@ class SettingController
      */
     public function save(Request $request): Response
     {
-        $smsTemplate = config('plugin.sms.sms-template');
+        $defaultConfig = config('plugin.sms.sms-default');
         $config = Sms::getConfig();
-        if (!$config) {
-            $config = [
-                'timeout' => 5.0,
-                'default' => [
-                    'strategy' => OrderStrategy::class,
-                    'gateways' => [],
-                ],
-                'gateways' => [],
-            ];
-        }
         $gatewayName = $request->post('gateway');
-        if (!isset($smsTemplate['gateways'][$gatewayName])) {
+        if (!isset($defaultConfig['gateways'][$gatewayName])) {
             return json(['code' => 1, 'msg' => '数据错误']);
         }
-        $gateway = $smsTemplate['gateways'][$gatewayName];
-        $gatewayConfig = [];
+        $gateway = $defaultConfig['gateways'][$gatewayName];
+        $gatewayConfig = $config['gateways'][$gatewayName] ?? $defaultConfig['gateways'][$gatewayName];
         foreach ($gateway as $field => $value) {
             if ($field === 'name') continue;
             $gatewayConfig[$field] = $request->post($field, '');
@@ -132,6 +123,103 @@ class SettingController
             throw $e;
         }
         return json(['code' => 0, 'msg' => 'ok']);
+    }
+
+    /**
+     * 短信模版测试
+     * @param Request $request
+     * @return Response
+     * @throws BusinessException
+     * @throws InvalidArgumentException
+     * @throws NoGatewayAvailableException
+     * @throws Throwable
+     */
+    public function testTemplate(Request $request): Response
+    {
+        if ($request->method() === 'GET') {
+            return view('template/test');
+        }
+
+        $gateway = $request->post('gateway');
+        $to = $request->post('to');
+        $templateName = $request->post('name');
+        $data = $request->post('data');
+        $data = $data ? json_decode($data, true) : [];
+        try {
+            Sms::sendByTemplate($to, $templateName, $data, [$gateway]);
+        }  catch (Throwable $e) {
+            if (method_exists($e, 'getExceptions')) {
+                throw new BusinessException(current($e->getExceptions())->getMessage());
+            }
+            throw $e;
+        }
+        return json(['code' => 0, 'msg' => 'ok']);
+    }
+
+    /**
+     * 插入
+     * @param Request $request
+     * @return Response
+     */
+    public function insertTemplate(Request $request): Response
+    {
+        if ($request->method() === 'POST') {
+            $gateway = $request->post('gateway');
+            $name = $request->post('name');
+            if (Template::get($gateway, $name)) {
+                return json(['code' => 1, 'msg' => '模版已经存在']);
+            }
+            $templateId = $request->post('template_id');
+            $sign = $request->post('sign');
+            Template::save($gateway, $name, ['template_id' => $templateId, 'sign' => $sign]);
+        }
+        return view('template/insert');
+    }
+
+    /**
+     * 更新
+     * @param Request $request
+     * @return Response
+     */
+    public function updateTemplate(Request $request): Response
+    {
+        if ($request->method() === 'POST') {
+            $gateway = $request->post('gateway');
+            $name = $request->post('name');
+            if (!Template::get($gateway, $name)) {
+                return json(['code' => 1, 'msg' => '模版不存在']);
+            }
+            $templateId = $request->post('template_id');
+            $sign = $request->post('sign');
+            Template::save($gateway, $name, ['template_id' => $templateId, 'sign' => $sign]);
+            return json(['code' => 0, 'msg' => 'ok']);
+        }
+        return view('template/update');
+    }
+
+    /**
+     * 删除
+     * @param Request $request
+     * @return Response
+     */
+    public function deleteTemplate(Request $request): Response
+    {
+        $gateway = $request->post('gateway');
+        $names = (array)$request->post('name');
+        Template::delete($gateway, $names);
+        return json(['code' => 0, 'msg' => 'ok']);
+    }
+
+    /**
+     * 获取模版
+     * @param Request $request
+     * @return Response
+     */
+    public function getTemplate(Request $request): Response
+    {
+        $gateway = $request->get('gateway');
+        $name = $request->get('name');
+        return json(['code' => 0, 'msg' => 'ok', 'data' => Template::get($gateway, $name)]);
     }
 
 }
