@@ -10,6 +10,9 @@ use Overtrue\EasySms\EasySms;
 use RuntimeException;
 use support\exception\BusinessException;
 
+/**
+ * Sms
+ */
 class Sms
 {
 
@@ -30,11 +33,12 @@ class Sms
      */
     public static function send($to, array $message, array $gateways = []): array
     {
-        $sms = static::getSms();
+        $sms = static::getSender();
         return $sms->send($to, $message, $gateways);
     }
 
     /**
+     * 按照标签发送
      * @param $tagName
      * @param $to
      * @param array $data
@@ -87,7 +91,7 @@ class Sms
      * @return EasySms
      * @throws BusinessException
      */
-    public static function getSms(array $config = []): EasySms
+    public static function getSender(array $config = []): EasySms
     {
         if (!class_exists(EasySms::class)) {
             throw new BusinessException('请执行 composer require overtrue/easy-sms 并重启');
