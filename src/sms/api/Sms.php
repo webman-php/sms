@@ -48,10 +48,10 @@ class Sms
         $config = static::getConfig();
         $templates = [];
         foreach ($config['gateways'] as $gatewayName => $gateway) {
-            if (!isset($gateway['templates'][$tagName])) {
+            if (!isset($gateway['tags'][$tagName])) {
                 continue;
             }
-            $tmp = $gateway['templates'][$tagName];
+            $tmp = $gateway['tags'][$tagName];
             $templates[$gatewayName] = ['template_id' => $tmp['template_id'], 'sign' => $tmp['sign']];
         }
         if (!$templates) {
