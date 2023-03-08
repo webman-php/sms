@@ -1,5 +1,5 @@
 <?php
 
 return [
-    '' => \plugin\sms\app\exception\Handler::class,
+    '' => support\exception\Handler::class,
 ];
